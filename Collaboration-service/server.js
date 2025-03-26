@@ -26,15 +26,29 @@ io.on('connection', (socket) => {
 
     socket.on('joinProject', (projectId) => {
         socket.join(projectId);
-        console.log(`Utilisateur ${socket.id} a rejoint le projet ${projectId}`);
+        console.log(` Utilisateur ${socket.id} a rejoint le projet ${projectId}`);
     });
 
     socket.on('sendMessage', async (data) => {
         const { sender, projectId, content } = data;
-        socket.join(projectId);
+        if (!socket.rooms.has(projectId)) {
+            socket.join(projectId);
+            console.log(`User auto-joined project ${projectId}`);
+        }
         const message = new Message({ sender, projectId, content });
         await message.save();
         io.to(projectId).emit('receiveMessage', message);       
+    });
+
+    socket.on('sendNotification', (data) => {
+        const {message, projectId } = data
+        if (!socket.rooms.has(projectId)) {
+            socket.join(projectId);
+            console.log(`User auto-joined project ${projectId}`);
+        }
+        const newMessage = `Project: ${projectId} -> ${message}`;
+        console.log(newMessage);
+        io.to(projectId).emit('receiveNotification',  {message, projectId });
     });
 
     socket.on('disconnect', () => {
@@ -51,7 +65,7 @@ app.get('/messages/:projectId', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
     console.log(`Serveur de collaboration sur http://localhost:${PORT}`);
 });
