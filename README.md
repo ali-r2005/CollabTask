@@ -10,6 +10,7 @@ A modern microservices-based task management system with authentication, project
   - [Project-Service](#Project-Service-Port-3003)
   - [Task-Service](#Task-Service-Port-3004)
   - [Collaboration-Service](#Collaboration-Service-Port-3002)
+  - [Reports Service](#reports-service)
 - [Technologies Used](#Technologies-Used)
 - [Setup Instructions](#Setup-Instructions)
   - [Prerequisites](#Prerequisites)
@@ -27,24 +28,25 @@ This project is a complete task management solution built using a microservices 
 2. **Project Service** - Manages projects, their lifecycle, and categorization
 3. **Task Service** - Handles task creation, assignment, status updates, and attachments
 4. **Collaboration Service** - Provides real-time messaging and notifications for project collaboration
+5. **Reports Service** - Generates reports on project progress, user workload, and task distribution
 
 Each service operates independently with its own database connections while communicating through REST APIs or WebSocket events.
 
 ## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│                 │     │                 │     │                 │     │                 │
-│  Auth Service   │◄────►  Project Service│◄────►   Task Service  │◄────► Collaboration   │
-│    (Port 3001)  │     │    (Port 3003)  │     │    (Port 3004)  │     │ Service (3002)  │
-│                 │     │                 │     │                 │     │                 │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                       │                       │
-         │                       │                       │                       │
-         ▼                       ▼                       ▼                       ▼
-    ┌──────────────────────────────────────────────────────────────────────────────────┐
-    │                                MongoDB                                           │
-    └──────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │     │                 │     │                 │
+│  Auth Service   │◄────►  Project Service│◄────►   Task Service  │◄────► Collaboration   │◄────►     Report      │
+│    (Port 3001)  │     │    (Port 3003)  │     │    (Port 3004)  │     │ Service (3002)  │     │ Service (3004)  │
+│                 │     │                 │     │                 │     │                 │     │                 │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │                       │                       │
+         │                       │                       │                       │                       │
+         ▼                       ▼                       ▼                       ▼                       ▼
+    ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                            MongoDB                                                       │
+    └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Services
@@ -85,6 +87,14 @@ Provides real-time collaboration features:
 - Message persistence in MongoDB
 - Historical message retrieval
 
+### Reports Service (Port 3004)
+Generates analytical reports based on project and task data:
+- Project progress tracking (completion percentage)
+- User workload analysis (tasks by status and priority)
+- Task priority distribution
+- Task distribution across users
+- Fetches data from Project and Task Services via REST APIs
+
 ## Technologies Used
 
 - **Backend**: Node.js, Express.js
@@ -102,6 +112,7 @@ Provides real-time collaboration features:
 - Node.js (v14 or higher)
 - MongoDB (local or Atlas)
 - npm or yarn
+- Docker (optional, for containerized deployment)
 
 ### Installation
 
@@ -122,20 +133,24 @@ Provides real-time collaboration features:
 3. Install dependencies for each service:
    ```bash
    # Auth Service
-   cd auth-service
-   npm install
-   
-   # Project Service
-   cd ../project-service
-   npm install
-   
-   # Task Service
-   cd ../task-service
-   npm install
-   
-   # Collaboration Service
-   cd ../collaboration-service
-   npm install
+    cd auth-service
+    npm install
+
+    # Project Service
+    cd ../project-service
+    npm install
+    
+    # Task Service
+    cd ../task-service
+    npm install
+    
+    # Collaboration Service
+    cd ../collaboration-service
+    npm install
+    
+    # Reports Service
+    cd ../reports-service
+    npm install
    ```
 
 4. Start each service:
@@ -143,20 +158,24 @@ Provides real-time collaboration features:
    # In separate terminal windows
    
    # Auth Service
-   cd auth-service
-   npm start
-   
-   # Project Service
-   cd project-service
-   npm start
-   
-   # Task Service
-   cd task-service
-   npm start
-   
-   # Collaboration Service
-   cd collaboration-service
-   npm start
+    cd auth-service
+    npm start
+    
+    # Project Service
+    cd ../project-service
+    npm start
+    
+    # Task Service
+    cd ../task-service
+    npm start
+    
+    # Collaboration Service
+    cd ../collaboration-service
+    npm start
+    
+    # Reports Service
+    cd ../reports-service
+    npm start
    ```
 
 ## API Documentation
@@ -251,6 +270,17 @@ socket.on('receiveNotification', (notification) => {
 | POST | /tasks/:id/comments | Add comment to task | Yes (Token) |
 | POST | /tasks/:id/attachments | Upload attachment | Yes (Token) |
 | GET | /tasks/reminders | Get tasks with upcoming deadlines | Yes (Token) |
+
+
+#### **Endpoints Rapports**
+| Method | Endpoint                        | Description                          | Auth Requise | Payload |
+|--------|---------------------------------|--------------------------------------|---------------|---------|
+| GET    | `/reports/project-progress`     | Rapport d'avancement des projets    | Oui (Token)   | None    |
+| GET    | `/reports/user-workload`        | Rapport sur la charge de travail    | Oui (Token)   | None    |
+| GET    | `/reports/task-priority-distribution` | Distribution des priorités des tâches | Oui (Token)   | None    |
+| GET    | `/reports/task-user-distribution` | Distribution des tâches par utilisateur | Oui (Token)   | None    |
+
+
 
 ## Authentication Flow
 
