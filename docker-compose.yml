@@ -28,6 +28,7 @@ services:
       - app-network
     volumes:
       - ./auth-service:/usr/src/app
+      - /usr/src/app/node_modules
     command: npm start
 
   collaboration-service:
@@ -46,6 +47,7 @@ services:
       - app-network
     volumes:
       - ./collaboration-service:/usr/src/app
+      - /usr/src/app/node_modules
     command: npm start
 
   project-service:
@@ -67,6 +69,7 @@ services:
       - app-network
     volumes:
       - ./project-service:/usr/src/app
+      - /usr/src/app/node_modules
     command: npm start
 
   task-service:
@@ -92,6 +95,7 @@ services:
     volumes:
       - ./task-service:/usr/src/app
       - ./task-service/uploads:/usr/src/app/uploads
+      - /usr/src/app/node_modules
     command: npm start
 
   reports-service:
@@ -115,6 +119,7 @@ services:
       - app-network
     volumes:
       - ./reports-service:/usr/src/app
+      - /usr/src/app/node_modules
     command: npm start
 
 networks:
